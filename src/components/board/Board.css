@@ -1,0 +1,18 @@
+.board {
+  height: 100vh;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  height: calc(100% / 10);
+}
+
+.cell {
+  width: calc(100% / 10 + 10px);
+}
+
+.cell > img {
+  height: 90px;
+}
