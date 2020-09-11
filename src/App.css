@@ -1,4 +1,6 @@
 .wrapper {
+  background: url("https://www.wallpapertip.com/wmimgs/48-487341_candy-crush-saga-wiki-candy-crush-saga-background.jpg");
+  height: 100vh;
 }
 
 .container {
@@ -7,4 +9,7 @@
   padding-left: 15px;
   margin-right: auto;
   margin-left: auto;
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
 }

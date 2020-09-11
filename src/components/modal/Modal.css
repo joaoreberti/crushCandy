@@ -1,0 +1,22 @@
+.modal {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  text-align: center;
+  display: flex;
+  display: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-tex-area {
+  background-color: gray;
+  padding: 10px;
+  color: whitesmoke;
+  border: 1px solid wheat;
+}
+
+.modal button {
+  margin: 1rem;
+}

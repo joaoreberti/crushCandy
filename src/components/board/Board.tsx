@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./Board.css";
 import purpleCandy from "../../assets/img/purple-candy.png";
 import emptyCell from "../../assets/img/empty.png";
@@ -7,7 +7,22 @@ import greenCandy from "../../assets/img/green-candy.png";
 import orangeCandy from "../../assets/img/orange-candy.png";
 import blueCandy from "../../assets/img/blue-candy.png";
 
-const Board = () => {
+import { PointsContext } from "../context/PointsContextProvider";
+import {
+  rearrangeBoard,
+  makeNewBoardWithXsizing,
+  checkIfCombos,
+} from "../logic/gameLogic";
+import { triggerAsyncId } from "async_hooks";
+const Board = (props: any) => {
+  const context = useContext(PointsContext);
+
+  if (typeof context === "undefined") {
+    throw new Error("context is not defined");
+  } else {
+  }
+
+  //sets image according to value
   const getImgFromValue = (value: any) => {
     if (value === 0) {
       return blueCandy;
@@ -24,71 +39,83 @@ const Board = () => {
     if (value === 4) {
       return orangeCandy;
     }
-  };
-
-  const rearrangeInitialBoard = (boardToValidate: any) => {
-    let result = [...boardToValidate];
-
-    let checkHorizontally = (board: any) => {
-      let tempResult = [...board];
-      for (let i = 0; i < tempResult.length; i++) {
-        let start = 0;
-        let end = 0;
-        let tempValue = undefined;
-        for (let j = 0; j < tempResult[i].length; j++) {
-          if (j === 0) {
-            tempValue = tempResult[i][j];
-            console.log("joao");
-          } else {
-            if (tempResult[i][j] === tempValue) {
-              end = j;
-              tempResult[i][j] = -1;
-            } else {
-              tempValue = tempResult[i][j];
-              start = j;
-              end = j;
-              tempResult[i][j] = -1;
-            }
-          }
-        }
-        if (end - start >= 3) {
-          console.log("reberti");
-          return (result = tempResult);
-        }
-      }
-      return board;
-    };
-    checkHorizontally(boardToValidate);
-    for (let i = 0; i < boardToValidate.length; i++) {
-      for (let j = 0; j < boardToValidate[i].length; j++) {}
+    if (value === -1) {
+      return emptyCell;
     }
-    return result;
   };
 
-  const randomNumber = () => {
-    return Math.floor(Math.random() * 5);
-  };
-  const makeNewBoardWithXsizing = (x: any) => {
-    let newBoard: any = [];
-    for (let i = 0; i < x; i++) {
-      newBoard.push([]);
-      for (let j = 0; j < x; j++) {
-        newBoard[i].push(randomNumber());
-      }
+  //based on a new board check if there are any combos horizontally or vertically
+  //Through checking vertically and horizontally which ones should be eliminated
+
+  const letsPickApiece = (line: number, col: number) => {
+    if (useStartPosition[0] === -1) {
+      setStartPostion([line, col]);
+    } else {
+      setEndPostion([line, col]);
     }
-
-    return newBoard;
   };
-  let [board, setNewBoard] = useState(makeNewBoardWithXsizing(10));
 
+  let [board, setNewBoard] = useState(makeNewBoardWithXsizing(6));
+  let [previousBoard, setPreviousBoard] = useState();
+  let [useStartPosition, setStartPostion] = useState([-1, -1]);
+  let [useEndPosition, setEndPostion] = useState([-1, -1]);
+  let [impossibleMove, setImpossibleMove] = useState(false);
+  let [points, setPoints] = useState(0);
+  let [destroyedCoordinates, setDestroyedCoordinates] = useState([]);
+  let [numberOfCandysLeft, setNumberOfCandysLeft] = useState(context.moves);
   useEffect(() => {
+    if (context.moves <= 0) {
+      console.log("Reberti");
+
+      props.triggerDefeat(points);
+    }
+
+    if (useEndPosition[0] !== -1) {
+      let result = checkIfCombos(
+        useStartPosition,
+        useEndPosition,
+        board,
+        points,
+        setPoints,
+        setDestroyedCoordinates,
+        context,
+        setEndPostion,
+        setStartPostion,
+        setImpossibleMove,
+        setPreviousBoard,
+        numberOfCandysLeft,
+        setNumberOfCandysLeft
+      );
+      setTimeout(() => {
+        console.log("joao");
+        setNewBoard(result);
+      }, 200);
+    }
     const timer = setTimeout(() => {
-      setNewBoard(rearrangeInitialBoard(board));
-    }, 1000);
+      if (impossibleMove) {
+        setTimeout(() => {
+          setNewBoard(previousBoard);
+          setImpossibleMove(false);
+        }, 500);
+      } else {
+        setNewBoard(
+          rearrangeBoard(
+            board,
+            false,
+            points,
+            setPoints,
+            setDestroyedCoordinates,
+            context,
+            numberOfCandysLeft,
+            setNumberOfCandysLeft
+          )
+        );
+      }
+    }, 500);
     return () => {
       clearTimeout(timer);
     };
-  }, []);
+  });
   return (
     <div className="board">
       {board.map((line: any, index: any) => {
@@ -96,11 +123,31 @@ const Board = () => {
           <div className="row">
             {line.map((cell: any, i: any) => {
               return (
-                <div className="cell">
-                  {/*    line: {index}
-                  index: {i}
-                  candy: {cell} */}
-                  <img alt="candy" src={getImgFromValue(cell)}></img>
+                <div
+                  className={`cell ${
+                    useStartPosition[0] === index && useStartPosition[1] === i
+                      ? "first-candy"
+                      : ""
+                  } ${
+                    useEndPosition[0] === index && useEndPosition[1] === i
+                      ? "second-candy"
+                      : ""
+                  }${destroyedCoordinates
+                    .filter((coordinate) => {
+                      if (coordinate[0] === index && coordinate[1] === i) {
+                        return true;
+                      }
+                    })
+                    .map((coordinate) => {
+                      return "disappear-animation ";
+                    })}`}
+                >
+                  <img
+                    alt="candy"
+                    draggable
+                    onClick={() => letsPickApiece(index, i)}
+                    src={getImgFromValue(cell)}
+                  ></img>
                 </div>
               );
             })}
