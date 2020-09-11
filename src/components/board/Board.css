@@ -79,3 +79,25 @@
 .disappear-animation {
   animation: 1s forwards ease-in-out disappear;
 }
+
+@media (max-width: 500px) {
+  .board {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100vh !important;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    background-color: pink;
+    border-color: gold;
+    border-style: solid;
+    border-bottom-style: none;
+    border-top-style: none;
+    border-left-width: 10px;
+    border-right-width: 10px;
+    box-shadow: -2px 17px 15px 0px black;
+  }
+}
