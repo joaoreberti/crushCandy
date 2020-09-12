@@ -1,20 +1,31 @@
-export const rearrangeBoard = (
-  boardToValidate: any,
-  checkMove: Boolean,
-  points: any,
-  setPoints: any,
-  setDestroyedCoordinates: any,
-  context: any,
-  numberOfCandysLeft: any,
-  setNumberOfCandysLeft: any
-) => {
-  let result = JSON.parse(JSON.stringify(boardToValidate));
-  let toDeleteHorizontal: any = [];
-  let toDeleteVertical: any = [];
-  let emptyPieces = false;
+type PointsContextType = {
+  points: number;
+  setPoints: (value: number) => void;
+  moves: number;
+  setMoves: (value: number) => void;
+};
 
-  let addNewPieces = (boardToCheck: any) => {
-    let tempResult = [...boardToCheck];
+export const rearrangeBoard = (
+  boardToValidate: Array<Array<number>>,
+  checkMove: Boolean,
+  points: number,
+  setPoints: (x: number) => void,
+  setDestroyedCoordinates: (x: any) => void,
+  context: PointsContextType | undefined
+) => {
+  if (typeof context === "undefined") {
+    throw new Error("context is not defined");
+  } else {
+  }
+  let result: Array<Array<number>> = JSON.parse(
+    JSON.stringify(boardToValidate)
+  );
+  let toDeleteHorizontal: Array<Array<number>> = [];
+  let toDeleteVertical: Array<Array<number>> = [];
+  let emptyPieces: boolean = false;
+
+  let addNewPieces = (boardToCheck: Array<Array<number>>) => {
+    let tempResult: Array<Array<number>> = [...boardToCheck];
 
     for (let line = tempResult.length - 1; line >= 0; line--) {
       for (let col = 0; col < tempResult[line].length; col++) {
@@ -44,13 +55,15 @@ export const rearrangeBoard = (
 
   addNewPieces(result);
 
-  let checkVertical = (boardToCheck: any) => {
-    let tempResult = JSON.parse(JSON.stringify(boardToCheck));
+  let checkVertical = (boardToCheck: Array<Array<number>>) => {
+    let tempResult: Array<Array<number>> = JSON.parse(
+      JSON.stringify(boardToCheck)
+    );
 
     for (let col = 0; col < tempResult[0].length; col++) {
-      let start = 0;
-      let end = 0;
-      let tempValue = undefined;
+      let start: number = 0;
+      let end: number = 0;
+      let tempValue: number | undefined = undefined;
       for (let line = 0; line < tempResult.length; line++) {
         /*  console.log(
             `line: ${line}, index: ${col}, value: ${tempResult[line][col]}`
@@ -82,12 +95,14 @@ export const rearrangeBoard = (
     //console.log(`toDeleteVertical: ${toDeleteVertical}`);
   };
 
-  let checkHorizontally = (boardToCheck: any) => {
-    let tempResult = JSON.parse(JSON.stringify(boardToCheck));
+  let checkHorizontally = (boardToCheck: Array<Array<number>>) => {
+    let tempResult: Array<Array<number>> = JSON.parse(
+      JSON.stringify(boardToCheck)
+    );
     for (let i = 0; i < tempResult.length; i++) {
-      let start = 0;
-      let end = 0;
-      let tempValue = undefined;
+      let start: number = 0;
+      let end: number = 0;
+      let tempValue: number | undefined = undefined;
       for (let j = 0; j < tempResult[i].length; j++) {
         //console.log(`line: ${i}, index: ${j}, value: ${tempResult[i][j]}`);
         if (j === 0) {
@@ -123,7 +138,7 @@ export const rearrangeBoard = (
   }
 
   //delete cells based on list with coordinates
-  let arrayToDestroy: any = [];
+  let arrayToDestroy: Array<Array<number> | []> = [];
   for (let h = 0; h < toDeleteHorizontal.length; h++) {
     //console.log("reberti");
 
@@ -138,6 +153,9 @@ export const rearrangeBoard = (
         //console.log({ points });
         setPoints(points);
         arrayToDestroy.push([toDeleteHorizontal[h][0], z]);
+        setDestroyedCoordinates(arrayToDestroy);
+        console.log({ arrayToDestroy });
+
         setTimeout(() => {
           result[toDeleteHorizontal[h][0]][z] = -1;
         }, 100);
@@ -147,8 +165,6 @@ export const rearrangeBoard = (
     }
   }
   for (let h = 0; h < toDeleteVertical.length; h++) {
-    //console.log("reberti");
-
     for (let z = toDeleteVertical[h][2]; z < toDeleteVertical[h][1] + 1; z++) {
       //console.log(`coordinates arrayToDestroy: ${arrayToDestroy}`);
       if (!checkMove) {
@@ -157,6 +173,9 @@ export const rearrangeBoard = (
 
         setPoints(points);
         arrayToDestroy.push([z, toDeleteVertical[h][0]]);
+        setDestroyedCoordinates(arrayToDestroy);
+        console.log({ arrayToDestroy });
+
         setTimeout(() => {
           result[z][toDeleteVertical[h][0]] = -1;
         }, 100);
@@ -166,9 +185,10 @@ export const rearrangeBoard = (
     }
   }
   setDestroyedCoordinates(arrayToDestroy);
-
   context.setPoints(points);
   context.setMoves(context.moves);
+
+  console.log(`returning result`);
   return result;
 };
 
@@ -176,8 +196,8 @@ const randomNumber = () => {
   return Math.floor(Math.random() * 5);
 };
 
-export const makeNewBoardWithXsizing = (x: any) => {
-  let newBoard: any = [];
+export const makeNewBoardWithXsizing = (x: number) => {
+  let newBoard: Array<Array<number>> = [];
   for (let i = 0; i < x; i++) {
     newBoard.push([]);
     for (let j = 0; j < x; j++) {
@@ -189,19 +209,17 @@ export const makeNewBoardWithXsizing = (x: any) => {
 };
 
 export const checkIfCombos = (
-  first: any,
-  second: any,
-  boardToCheck: any,
-  points: any,
-  setPoints: any,
-  setDestroyedCoordinates: any,
-  context: any,
-  setEndPostion: any,
-  setStartPostion: any,
-  setImpossibleMove: any,
-  setPreviousBoard: any,
-  numberOfCandysLeft: any,
-  setNumberOfCandysLeft: any
+  first: Array<number>,
+  second: Array<number>,
+  boardToCheck: Array<Array<number>>,
+  points: number,
+  setPoints: (value: number) => void,
+  setDestroyedCoordinates: (x: any) => void,
+  context: PointsContextType | undefined,
+  setEndPostion: (x: Array<number>) => void,
+  setStartPostion: (x: Array<number>) => void,
+  setImpossibleMove: (x: boolean) => void,
+  setPreviousBoard: (x: Array<Array<number>>) => void
 ) => {
   let newBoard = JSON.parse(JSON.stringify(boardToCheck));
 
@@ -234,9 +252,7 @@ export const checkIfCombos = (
           points,
           setPoints,
           setDestroyedCoordinates,
-          context,
-          numberOfCandysLeft,
-          setNumberOfCandysLeft
+          context
         )
       ) === JSON.stringify(newBoard)
     ) {
@@ -280,9 +296,7 @@ export const checkIfCombos = (
           points,
           setPoints,
           setDestroyedCoordinates,
-          context,
-          numberOfCandysLeft,
-          setNumberOfCandysLeft
+          context
         )
       ) === JSON.stringify(newBoard)
     ) {

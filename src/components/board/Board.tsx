@@ -13,7 +13,7 @@ import {
   makeNewBoardWithXsizing,
   checkIfCombos,
 } from "../logic/gameLogic";
-import { triggerAsyncId } from "async_hooks";
+
 const Board = (props: any) => {
   const context = useContext(PointsContext);
 
@@ -56,13 +56,12 @@ const Board = (props: any) => {
   };
 
   let [board, setNewBoard] = useState(makeNewBoardWithXsizing(6));
-  let [previousBoard, setPreviousBoard] = useState();
+  let [previousBoard, setPreviousBoard] = useState([] as [] | number[][]);
   let [useStartPosition, setStartPostion] = useState([-1, -1]);
   let [useEndPosition, setEndPostion] = useState([-1, -1]);
   let [impossibleMove, setImpossibleMove] = useState(false);
   let [points, setPoints] = useState(0);
   let [destroyedCoordinates, setDestroyedCoordinates] = useState([]);
-  let [numberOfCandysLeft, setNumberOfCandysLeft] = useState(context.moves);
   useEffect(() => {
     if (context.moves <= 0) {
       console.log("Reberti");
@@ -82,15 +81,13 @@ const Board = (props: any) => {
         setEndPostion,
         setStartPostion,
         setImpossibleMove,
-        setPreviousBoard,
-        numberOfCandysLeft,
-        setNumberOfCandysLeft
+        setPreviousBoard
       );
       setTimeout(() => {
-        console.log("joao");
         setNewBoard(result);
       }, 200);
     }
+
     const timer = setTimeout(() => {
       if (impossibleMove) {
         setTimeout(() => {
@@ -105,9 +102,7 @@ const Board = (props: any) => {
             points,
             setPoints,
             setDestroyedCoordinates,
-            context,
-            numberOfCandysLeft,
-            setNumberOfCandysLeft
+            context
           )
         );
       }
@@ -115,13 +110,22 @@ const Board = (props: any) => {
     return () => {
       clearTimeout(timer);
     };
-  });
+  }, [
+    context,
+    useEndPosition,
+    props,
+    points,
+    useStartPosition,
+    board,
+    impossibleMove,
+    previousBoard,
+  ]);
   return (
     <div className="board">
-      {board.map((line: any, index: any) => {
+      {board.map((line: number[], index: number) => {
         return (
           <div className="row">
-            {line.map((cell: any, i: any) => {
+            {line.map((cell: number, i: number) => {
               return (
                 <div
                   className={`cell ${
@@ -136,6 +140,8 @@ const Board = (props: any) => {
                     .filter((coordinate) => {
                       if (coordinate[0] === index && coordinate[1] === i) {
                         return true;
+                      } else {
+                        return false;
                       }
                     })
                     .map((coordinate) => {
